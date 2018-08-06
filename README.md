@@ -12,6 +12,15 @@ If SharpChrome is run from a high integrity context (such as Administrator), it 
 
 Note: All cookies returned are in JSON format. If you have the extension "EditThisCookie" installed, you can simply copy and paste into the "Import" seciton of this browser addon to ride the extraction session.
 
+## Advantages
+
+This rewrite has several advantages to previous implementations, which include:
+
+- No Type compilation or reflection required
+- .NET 2.0 compliant, so it can run across all Winodws platforms
+- Cookies are displayed in JSON format, for easy importing into EditThisCookie.
+- No downloading SQLite assemblies from remote resources.
+
 ## Usage
 
 ```
@@ -35,16 +44,25 @@ Retrieve cookies associated with Google Docs and Github
 ```
 .\SharpChrome.exe cookies docs.google.com github.com
 ```
+[!cookies](images/cookies.png)
 
 Retrieve history items and their associated cookies.
 ```
 .\SharpChrome.exe history
 ```
+[!history](images/history_item.png)
 
 Retrieve saved logins (Note: Only displays those with non-empty passwords):
 ```
 .\SharpChrome.exe logins
 ```
+[!logins](images/logins.png)
+
+
+## Notes on the SQLite Parser
+
+The SQLite database parser is slightly bugged. This is due to the fact that the parser correctly detects data blobs as type System.Byte[], but it does not correctly detect columns of type System.Byte[]. As a result, the byte arrays get cast to the string literal "System.Byte[]", which is wrong. I haven't gotten to the root of this cause, but as a quick and dirty workaround I have encoded all blob values as Base64 strings. Thus if you wish to retrieve a value from a column whose regular data values would be a byte array, you'll need to Base64 decode them first.
+
 
 ## Special Thanks
 
