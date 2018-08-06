@@ -17,7 +17,7 @@ Note: All cookies returned are in JSON format. If you have the extension "EditTh
 This rewrite has several advantages to previous implementations, which include:
 
 - No Type compilation or reflection required
-- .NET 2.0 compliant, so it can run across all Winodws platforms
+- .NET 2.0 compliant, so it can run across all Windows platforms
 - Cookies are displayed in JSON format, for easy importing into EditThisCookie.
 - No downloading SQLite assemblies from remote resources.
 
@@ -44,19 +44,19 @@ Retrieve cookies associated with Google Docs and Github
 ```
 .\SharpChrome.exe cookies docs.google.com github.com
 ```
-[!cookies](images/cookies.png)
+![cookies](images/cookies.png)
 
 Retrieve history items and their associated cookies.
 ```
 .\SharpChrome.exe history
 ```
-[!history](images/history_item.png)
+![history](images/history_item.png)
 
 Retrieve saved logins (Note: Only displays those with non-empty passwords):
 ```
 .\SharpChrome.exe logins
 ```
-[!logins](images/logins.png)
+![logins](images/logins.png)
 
 
 ## Notes on the SQLite Parser
