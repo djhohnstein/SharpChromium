@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("C#-SQLite 3")]
-[assembly: AssemblyDescription("C#-SQLite is an independent reimplementation of the SQLite software library")]
+[assembly: AssemblyTitle("SharpChrome")]
+[assembly: AssemblyDescription("SharpChrome is a C# project to read and extract information from Google Chrome.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Pioneer Software Consulting")]
-[assembly: AssemblyProduct("C#-SQLite3 shell")]
-[assembly: AssemblyCopyright("Copyright ©  2009")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("")]
+[assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
