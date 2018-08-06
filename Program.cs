@@ -19,10 +19,10 @@ namespace SharpChrome
         {
             string banner = @"
 Usage:
-    .\sharpchrome.exe arg0 [arg1 arg2 ...]
+    .\SharpChrome.exe arg0 [arg1 arg2 ...]
 
 Arguments:
-    all       - Retrieve all Chrome Bookmarks, History, Cookies and Logins.
+    all       - Retrieve all Chrome Cookies, History and Logins.
     full      - The same as 'all'
     logins    - Retrieve all saved credentials that have non-empty passwords.
     history   - Retrieve user's history with a count of each time the URL was
