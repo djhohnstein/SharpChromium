@@ -154,7 +154,7 @@ namespace CS_SQLite3
                 {
                 case CSSQLite.SQLITE_INTEGER:
                     {
-                    columnValues[i] = CSSQLite.sqlite3_column_int( vm, i );
+                    columnValues[i] = CSSQLite.sqlite3_column_int64( vm, i );
                     break;
                     }
                 case CSSQLite.SQLITE_FLOAT:

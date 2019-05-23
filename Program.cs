@@ -449,7 +449,7 @@ Arguments:
             string lastHostKey = "";
             foreach (DataRow row in cookieTable.Rows)
             {
-                if (lastHostKey != (string)row["host_key"])
+                if (row["host_key"].GetType() != typeof(System.DBNull) && lastHostKey != (string)row["host_key"])
                 {
                     lastHostKey = (string)row["host_key"];
                     if (hostInstance != null)
@@ -465,7 +465,8 @@ Arguments:
                 cookie.Domain = row["host_key"].ToString();
                 long expDate;
                 Int64.TryParse(row["expires_utc"].ToString(), out expDate);
-                cookie.ExpirationDate = expDate;
+                // https://github.com/djhohnstein/SharpChrome/issues/1
+                cookie.ExpirationDate = (expDate / 1000000) - 11644473600;
                 cookie.HostOnly = false; // I'm not sure this is stored in the cookie store and seems to be always false
                 if (row["is_httponly"].ToString() == "1")
                 {
