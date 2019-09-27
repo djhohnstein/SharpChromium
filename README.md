@@ -18,7 +18,7 @@ This rewrite has several advantages to previous implementations, which include:
 
 - No Type compilation or reflection required
 - .NET 2.0 compliant, so it can run across all Windows platforms
-- Cookies are displayed in JSON format, for easy importing into EditThisCookie.
+- Cookies are displayed in JSON format, for easy importing into ~EditThisCookie~ Cookie Manager.
 - No downloading SQLite assemblies from remote resources.
 
 ## Usage

