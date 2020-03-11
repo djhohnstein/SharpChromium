@@ -61,7 +61,7 @@ namespace SharpChrome
                         j++;
                     }
                 }
-                return "{\"cookies\": [" + String.Join(",", jsonCookies.ToArray()) + "]}";
+                return "[" + String.Join(",", jsonCookies.ToArray()) + "]";
             }
             return "";
         }
