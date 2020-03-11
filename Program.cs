@@ -54,6 +54,10 @@ Arguments:
             bool getBookmarks = false;
             bool getLogins = false;
             bool useTmpFile = false;
+            bool useBCryptDecryption = false;
+
+            ChromeCredentialManager chromeManager = new ChromeCredentialManager();
+
             // For filtering cookies
             List<String> domains = new List<String>();
 
@@ -111,88 +115,38 @@ Arguments:
                 return;
             }
 
-            // If Chrome is running, we'll need to clone the files we wish to parse.
-            Process[] chromeProcesses = Process.GetProcessesByName("chrome");
-            if (chromeProcesses.Length > 0)
-            {
-                useTmpFile = true;
-            }
-
-            //foreach(string path in paths)
-            //{
-
-            //}
-            //GetLogins(chromeLoginDataPath);
-
+            
             // Main loop, path parsing and high integrity check taken from GhostPack/SeatBelt
             try
             {
-                
-                string userChromeHistoryPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\History", System.Environment.GetEnvironmentVariable("USERPROFILE"));
-                string userChromeBookmarkPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Bookmarks", System.Environment.GetEnvironmentVariable("USERPROFILE"));
-                string userChromeCookiesPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Cookies", System.Environment.GetEnvironmentVariable("USERPROFILE"));
-                string userChromeLoginDataPath = String.Format("{0}\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Login Data", System.Environment.GetEnvironmentVariable("USERPROFILE"));
-                string[] chromePaths = { userChromeHistoryPath, userChromeBookmarkPath, userChromeCookiesPath, userChromeLoginDataPath };
-                if (ChromeExists(chromePaths))
+                if (getCookies)
                 {
-                    Console.WriteLine("\r\n\r\n=== Chrome (Current User) ===");
-                    if (useTmpFile)
+                    var cookies = chromeManager.GetCookies();
+                    if (domainArray.Length > 0)
                     {
-                        if (getCookies)
+                        foreach(var domain in domainArray)
                         {
-                            string tmpUserChromeCookiesPath = CreateTempFile(userChromeCookiesPath);
-                            if (domainArray.Length > 0)
-                            {
-                                ParseChromeCookies(tmpUserChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"), true, domainArray);
-                            }
-                            else
-                            {
-                                ParseChromeCookies(tmpUserChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"), true);
-                            }
-                            File.Delete(tmpUserChromeCookiesPath);
-                        }
-
-                        if (getHistory)
-                        {
-                            string tmpUserChromeCookiesPath = CreateTempFile(userChromeCookiesPath);
-                            HostCookies[] cookies = ParseChromeCookies(tmpUserChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"));
-                            File.Delete(tmpUserChromeCookiesPath);
-                            userChromeHistoryPath = CreateTempFile(userChromeHistoryPath);
-                            ParseChromeHistory(userChromeHistoryPath, System.Environment.GetEnvironmentVariable("USERNAME"), cookies);
-                            File.Delete(userChromeHistoryPath);
-                        }
-
-                        if (getLogins)
-                        {
-                            userChromeLoginDataPath = CreateTempFile(userChromeLoginDataPath);
-                            ParseChromeLogins(userChromeLoginDataPath, System.Environment.GetEnvironmentVariable("USERNAME"));
-                            File.Delete(userChromeLoginDataPath);
+                            var subCookies = HostCookies.FilterHostCookies(cookies, domain);
+                            subCookies.Print();
                         }
                     }
-                    else
+                }
+
+                if (getHistory)
+                {
+                    var history = chromeManager.GetHistory();
+                    foreach(var item in history)
                     {
-                        if (getCookies)
-                        {
-                            if (domainArray.Length > 0)
-                            {
-                                ParseChromeCookies(userChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"), true, domainArray);
-                            }
-                            else
-                            {
-                                ParseChromeCookies(userChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"), true);
-                            }
-                        }
+                        item.Print();
+                    }
+                }
 
-                        if (getHistory)
-                        {
-                            HostCookies[] cookies = ParseChromeCookies(userChromeCookiesPath, System.Environment.GetEnvironmentVariable("USERNAME"));
-                            ParseChromeHistory(userChromeHistoryPath, System.Environment.GetEnvironmentVariable("USERNAME"), cookies);
-                        }
-
-                        if (getLogins)
-                        {
-                            ParseChromeLogins(userChromeLoginDataPath, System.Environment.GetEnvironmentVariable("USERNAME"));
-                        }
+                if (getLogins)
+                {
+                    var logins = chromeManager.GetSavedLogins();
+                    foreach(var login in logins)
+                    {
+                        login.Print();
                     }
                 }
             }
@@ -222,146 +176,6 @@ Arguments:
             string tempFileName = localAppData + "\\Temp\\" + newFile;
             File.Copy(filePath, tempFileName);
             return tempFileName;
-        }
-
-        public class Cookie
-        {
-            private string _domain;
-            private long _expirationDate;
-            private bool _hostOnly;
-            private bool _httpOnly;
-            private string _name;
-            private string _path;
-            //private string _sameSite;
-            private bool _secure;
-            private bool _session;
-            private string _storeId;
-            private string _value;
-            private int _id;
-
-            // Getters and setters
-            public string Domain
-            {
-                get { return _domain; }
-                set { _domain = value; }
-            }
-            public long ExpirationDate
-            {
-                get { return _expirationDate; }
-                set { _expirationDate = value; }
-            }
-            public bool HostOnly
-            {
-                get { return _hostOnly; }
-                set { _hostOnly = value; }
-            }
-            public bool HttpOnly
-            {
-                get { return _httpOnly; }
-                set { _httpOnly = value; }
-            }
-            public string Name
-            {
-                get { return _name; }
-                set { _name = value; }
-            }
-            public string Path
-            {
-                get { return _path; }
-                set { _path = value; }
-            }
-            //public string SameSite
-            //{
-            //    get { return _sameSite; }
-            //    set { _sameSite = value; }
-            //}
-            public bool Secure
-            {
-                get { return _secure; }
-                set { _secure = value; }
-            }
-            public bool Session
-            {
-                get { return _session; }
-                set { _session = value; }
-            }
-            public string StoreId
-            {
-                get { return _storeId; }
-                set { _storeId = value; }
-            }
-            public string Value
-            {
-                get { return _value; }
-                set { _value = value; }
-            }
-            public int Id
-            {
-                get { return _id; }
-                set { _id = value; }
-            }
-
-            public string ToJSON()
-            {
-                Type type = this.GetType();
-                PropertyInfo[] properties = type.GetProperties();
-                string[] jsonItems = new string[properties.Length]; // Number of items in EditThisCookie
-                for (int i = 0; i < properties.Length; i++)
-                {
-                    PropertyInfo property = properties[i];
-                    object[] keyvalues = { property.Name[0].ToString().ToLower() + property.Name.Substring(1, property.Name.Length - 1), property.GetValue(this, null) };
-                    if (keyvalues[1].ToString().Contains("\""))
-                    {
-                        keyvalues[1] = keyvalues[1].ToString().Replace("\"", "\\\"");
-                    }
-                    string jsonString = "";
-                    if (keyvalues[1].GetType() == typeof(String))
-                    {
-                        jsonString = String.Format("\"{0}\": \"{1}\"", keyvalues);
-                    }
-                    else if (keyvalues[1].GetType() == typeof(Boolean))
-                    {
-                        keyvalues[1] = keyvalues[1].ToString().ToLower();
-                        jsonString = String.Format("\"{0}\": {1}", keyvalues);
-                    }
-                    else
-                    {
-                        jsonString = String.Format("\"{0}\": {1}", keyvalues);
-                    }
-                    jsonItems[i] = jsonString;
-                }
-                string results = "{" + String.Join(", ", jsonItems) + "}";
-                return results;
-            }
-        }
-
-        public class HostCookies
-        {
-            private Cookie[] _cookies;
-            private string _hostName;
-
-            public Cookie[] Cookies
-            {
-                get { return _cookies; }
-                set { _cookies = value; }
-            }
-
-            public string HostName
-            {
-                get { return _hostName; }
-                set { _hostName = value; }
-            }
-
-            public string ToJSON()
-            {
-                string[] jsonCookies = new string[this.Cookies.Length];
-                for (int i = 0; i < this.Cookies.Length; i++)
-                {
-                    this.Cookies[i].Id = i + 1;
-                    jsonCookies[i] = this.Cookies[i].ToJSON();
-                }
-                return "{\"cookies\": [" + String.Join(",", jsonCookies) + "]}";
-            }
         }
 
         public static HostCookies[] SortCookieData(DataTable cookieTable)
