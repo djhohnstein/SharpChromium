@@ -88,6 +88,8 @@ namespace SharpChrome
         {
             Type type = this.GetType();
             PropertyInfo[] properties = type.GetProperties();
+            if (properties == null | properties.Length == 0)
+                return "";
             string[] jsonItems = new string[properties.Length]; // Number of items in EditThisCookie
             for (int i = 0; i < properties.Length; i++)
             {

@@ -107,6 +107,7 @@ Arguments:
                     Console.WriteLine("[X] Invalid argument passed: {0}", arg);
                 }
             }
+
             string[] domainArray = domains.ToArray();
 
             if (!getCookies && !getHistory && !getLogins)
@@ -122,12 +123,18 @@ Arguments:
                 if (getCookies)
                 {
                     var cookies = chromeManager.GetCookies();
-                    if (domainArray.Length > 0)
+                    if (domainArray != null && domainArray.Length > 0)
                     {
                         foreach(var domain in domainArray)
                         {
                             var subCookies = HostCookies.FilterHostCookies(cookies, domain);
                             subCookies.Print();
+                        }
+                    } else
+                    {
+                        foreach (var cookie in cookies)
+                        {
+                            cookie.Print();
                         }
                     }
                 }
@@ -149,10 +156,12 @@ Arguments:
                         login.Print();
                     }
                 }
+
+                Console.WriteLine("[*] Done.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("  [X] Exception: {0}", ex.Message);
+                Console.WriteLine("[X] Exception: {0}\n\n{1}", ex.Message, ex.StackTrace);
             }
         }
 

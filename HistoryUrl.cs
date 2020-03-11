@@ -22,15 +22,23 @@ namespace SharpChrome
             Cookies = HostCookies.FilterHostCookies(cookies, Url);
         }
 
+        private string SpaceGenerator(int numSpaces)
+        {
+            string result = "";
+            for (int i = 0; i < numSpaces; i++)
+                result += " ";
+            return result;
+        }
+
         public void Print()
         {
             string user = Environment.GetEnvironmentVariable("USERNAME");
             Console.WriteLine("--- Chrome History (User: {0}) ---", user);
             int spaces = 15;
-            Console.WriteLine("{0}{1}: {2}", "URL", spaces - 3, Url);
-            Console.WriteLine("{0}{1}: {2}", "Title", spaces - 5, Title == "" ? "No Title" : Title);
-            Console.WriteLine("{0}{1}: {2}", "Visit Count", spaces - 11, VisitCount);
-            Console.WriteLine("{0}{1}: {2}", "Cookies", spaces - 7, Cookies.ToJSON());
+            Console.WriteLine("{0}{1}: {2}", "URL", SpaceGenerator(spaces - 3), Url);
+            Console.WriteLine("{0}{1}: {2}", "Title", SpaceGenerator(spaces - 5), Title == "" ? "No Title" : Title);
+            Console.WriteLine("{0}{1}: {2}", "Visit Count", SpaceGenerator(spaces - 11), VisitCount);
+            Console.WriteLine("{0}{1}: {2}", "Cookies", spaces - 7, Cookies == null ? "": Cookies.ToJSON());
             Console.WriteLine();
         }
 

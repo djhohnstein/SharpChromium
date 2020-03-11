@@ -76,6 +76,8 @@ namespace SharpChrome
             string lastHostKey = "";
             foreach (DataRow row in query.Rows)
             {
+                if (row == null)
+                    continue;
                 if (row["host_key"].GetType() != typeof(System.DBNull) && lastHostKey != (string)row["host_key"])
                 {
                     lastHostKey = (string)row["host_key"];
@@ -118,8 +120,12 @@ namespace SharpChrome
                 cookie.StoreId = "0"; // Static
                 byte[] cookieValue = Convert.FromBase64String(row["encrypted_value"].ToString());
                 cookieValue = DecryptBlob(cookieValue);
-                cookie.Value = System.Text.Encoding.ASCII.GetString(cookieValue);
-                cookies.Add(cookie);
+                if (cookieValue != null)
+                    cookie.Value = System.Text.Encoding.ASCII.GetString(cookieValue);
+                else
+                    cookie.Value = "";
+                if (cookie != null)
+                    cookies.Add(cookie);
             }
             return hostCookies.ToArray();
         }
@@ -244,9 +250,11 @@ namespace SharpChrome
             List<SavedLogin> logins = new List<SavedLogin>();
             foreach (DataRow row in resultantQuery.Rows)
             {
+                string password = String.Empty;
                 byte[] passwordBytes = Convert.FromBase64String((string)row["password_value"]);
                 byte[] decBytes = DecryptBlob(passwordBytes);
-                string password = Encoding.ASCII.GetString(decBytes);
+                if (decBytes != null)
+                    password = Encoding.ASCII.GetString(decBytes);
                 if (password != String.Empty)
                 {
                     logins.Add(new SavedLogin(row["action_url"].ToString(), row["username_value"].ToString(), password));
