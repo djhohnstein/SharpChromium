@@ -38,7 +38,7 @@ namespace SharpChrome
             Console.WriteLine("{0}{1}: {2}", "URL", SpaceGenerator(spaces - 3), Url);
             Console.WriteLine("{0}{1}: {2}", "Title", SpaceGenerator(spaces - 5), Title == "" ? "No Title" : Title);
             Console.WriteLine("{0}{1}: {2}", "Visit Count", SpaceGenerator(spaces - 11), VisitCount);
-            Console.WriteLine("{0}{1}: {2}", "Cookies", spaces - 7, Cookies == null ? "": Cookies.ToJSON());
+            Console.WriteLine("{0}{1}: {2}", "Cookies", SpaceGenerator(spaces - 7), Cookies == null ? "": Cookies.ToJSON());
             Console.WriteLine();
         }
 
