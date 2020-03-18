@@ -10,17 +10,17 @@ namespace SharpChrome
     public class Cookie
     {
         private string _domain;
-        private long _expirationDate;
+        private double _expirationDate;
         private bool _hostOnly;
         private bool _httpOnly;
         private string _name;
         private string _path;
-        //private string _sameSite;
+        private string _sameSite;
         private bool _secure;
         private bool _session;
         private string _storeId;
         private string _value;
-        private int _id;
+        //private int _id;
 
         // Getters and setters
         public string Domain
@@ -28,7 +28,7 @@ namespace SharpChrome
             get { return _domain; }
             set { _domain = value; }
         }
-        public long ExpirationDate
+        public double ExpirationDate
         {
             get { return _expirationDate; }
             set { _expirationDate = value; }
@@ -53,11 +53,11 @@ namespace SharpChrome
             get { return _path; }
             set { _path = value; }
         }
-        //public string SameSite
-        //{
-        //    get { return _sameSite; }
-        //    set { _sameSite = value; }
-        //}
+        public string SameSite
+        {
+            get { return _sameSite; }
+            set { _sameSite = value; }
+        }
         public bool Secure
         {
             get { return _secure; }
@@ -78,10 +78,33 @@ namespace SharpChrome
             get { return _value; }
             set { _value = value; }
         }
-        public int Id
+        //public int Id
+        //{
+        //    get { return _id; }
+        //    set { _id = value; }
+        //}
+
+        public void SetSameSiteCookie(string val)
         {
-            get { return _id; }
-            set { _id = value; }
+            switch (val)
+            {
+                case "-1":
+                    this.SameSite = "unspecified";
+                    break;
+                case "0":
+                    this.SameSite = "no_restriction";
+                    break;
+                case "1":
+                    this.SameSite = "lax";
+                    break;
+                case "2":
+                    this.SameSite = "strict";
+                    break;
+
+                default:
+                    this.SameSite = "unspecified";
+                    break;
+            }
         }
 
         public string ToJSON()
@@ -90,32 +113,37 @@ namespace SharpChrome
             PropertyInfo[] properties = type.GetProperties();
             if (properties == null | properties.Length == 0)
                 return "";
-            string[] jsonItems = new string[properties.Length]; // Number of items in EditThisCookie
+            List<string> jsonItems = new List<string>(); // Number of items in EditThisCookie
             for (int i = 0; i < properties.Length; i++)
             {
                 PropertyInfo property = properties[i];
                 object[] keyvalues = { property.Name[0].ToString().ToLower() + property.Name.Substring(1, property.Name.Length - 1), property.GetValue(this, null) };
-                if (keyvalues[1].ToString().Contains("\""))
+                if (keyvalues[1] != null && keyvalues[1].ToString().Contains("\""))
                 {
                     keyvalues[1] = keyvalues[1].ToString().Replace("\"", "\\\"");
                 }
                 string jsonString = "";
-                if (keyvalues[1].GetType() == typeof(String))
+                if (keyvalues[0].ToString() == "expirationDate" && keyvalues[1].ToString() == "0")
+                    continue;
+                if (keyvalues[1] == null)
+                    jsonString = String.Format("    \"{0}\": null", keyvalues[0]);
+                else if (keyvalues[1].GetType() == typeof(String))
                 {
-                    jsonString = String.Format("\"{0}\": \"{1}\"", keyvalues);
+                    jsonString = String.Format("    \"{0}\": \"{1}\"", keyvalues);
                 }
                 else if (keyvalues[1].GetType() == typeof(Boolean))
                 {
                     keyvalues[1] = keyvalues[1].ToString().ToLower();
-                    jsonString = String.Format("\"{0}\": {1}", keyvalues);
+                    jsonString = String.Format("    \"{0}\": {1}", keyvalues);
                 }
                 else
                 {
-                    jsonString = String.Format("\"{0}\": {1}", keyvalues);
+                    jsonString = String.Format("    \"{0}\": {1}", keyvalues);
                 }
-                jsonItems[i] = jsonString;
+                if (jsonString != "")
+                    jsonItems.Add(jsonString);
             }
-            string results = "{" + String.Join(", ", jsonItems) + "}";
+            string results = "{\n" + String.Join(",\n", jsonItems.ToArray()) + "\n}";
             return results;
         }
     }

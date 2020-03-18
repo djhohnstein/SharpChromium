@@ -95,8 +95,9 @@ namespace SharpChrome
                 long expDate;
                 Int64.TryParse(row["expires_utc"].ToString(), out expDate);
                 // https://github.com/djhohnstein/SharpChrome/issues/1
-                cookie.ExpirationDate = (expDate / 1000000) - 11644473600;
-                cookie.HostOnly = false; // I'm not sure this is stored in the cookie store and seems to be always false
+                if ((expDate / 1000000.000000000000) - 11644473600 > 0)
+                    cookie.ExpirationDate = (expDate / 1000000.000000000000000) - 11644473600;
+                cookie.HostOnly = cookie.Domain[0] == '.' ? false : true; // I'm not sure this is stored in the cookie store and seems to be always false
                 if (row["is_httponly"].ToString() == "1")
                 {
                     cookie.HttpOnly = true;
@@ -116,8 +117,10 @@ namespace SharpChrome
                 {
                     cookie.Secure = false;
                 }
-                cookie.Session = false; // Unsure, this seems to be false always
-                cookie.StoreId = "0"; // Static
+                cookie.Session = row["is_persistent"].ToString() == "0" ? true : false; // Unsure, this seems to be false always
+                //cookie.StoreId = "0"; // Static
+                cookie.StoreId = null;
+                cookie.SetSameSiteCookie(row["sameSite"].ToString());
                 byte[] cookieValue = Convert.FromBase64String(row["encrypted_value"].ToString());
                 cookieValue = DecryptBlob(cookieValue);
                 if (cookieValue != null)

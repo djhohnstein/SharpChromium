@@ -2,22 +2,19 @@
 
 ## Introduction
 
-SharpChrome is a .NET 2.0 CLR project to retrieve data from Google Chrome. Currently, it can extract:
+SharpChrome is a .NET 4.0+ CLR project to retrieve data from Google Chrome. Currently, it can extract:
 
 - Cookies (in JSON format)
 - History (with associated cookies for each history item)
 - Saved Logins
 
-If SharpChrome is run from a high integrity context (such as Administrator), it will retrieve Chrome data for each user with Chrome installed.
-
-Note: All cookies returned are in JSON format. If you have the extension "EditThisCookie" installed, you can simply copy and paste into the "Import" seciton of this browser addon to ride the extraction session.
+Note: All cookies returned are in JSON format. If you have the extension "Cookie Editor" installed, you can simply copy and paste into the "Import" seciton of this browser addon to ride the extraction session.
 
 ## Advantages
 
 This rewrite has several advantages to previous implementations, which include:
 
 - No Type compilation or reflection required
-- .NET 2.0 compliant, so it can run across all Windows platforms
 - Cookies are displayed in JSON format, for easy importing into ~EditThisCookie~ Cookie Manager.
 - No downloading SQLite assemblies from remote resources.
 
@@ -67,3 +64,5 @@ The SQLite database parser is slightly bugged. This is due to the fact that the 
 ## Special Thanks
 
 A large thanks to @plainprogrammer for their C#-SQLite project which allowed for native parsing of the SQLite files without having to reflectively load a DLL. Without their work this project would be nowhere near as clean as it is. That project can be found here: https://github.com/plainprogrammer/csharp-sqlite
+
+Additionally, thanks to @gentlekiwi whose work on Mimikatz guided the rewrite for the decryption schema in v80+

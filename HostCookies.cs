@@ -28,7 +28,7 @@ namespace SharpChrome
             string user = Environment.GetEnvironmentVariable("USERNAME");
             Console.WriteLine("--- Chrome Cookie (User: {0}) ---", user);
             Console.WriteLine("Domain         : {0}", HostName);
-            Console.WriteLine("Cookies (JSON) : {0}", ToJSON());
+            Console.WriteLine("Cookies (JSON) :\n{0}", ToJSON());
             Console.WriteLine();
         }
 
@@ -56,12 +56,12 @@ namespace SharpChrome
                     //Console.WriteLine("Cookie {0}: {1}", i, this.Cookies[i]);
                     if (this.Cookies[i] != null)
                     {
-                        this.Cookies[i].Id = j + 1;
+                        //this.Cookies[i].Id = j + 1;
                         jsonCookies.Add(this.Cookies[i].ToJSON());
                         j++;
                     }
                 }
-                return "[" + String.Join(",", jsonCookies.ToArray()) + "]";
+                return "[\n" + String.Join(",\n", jsonCookies.ToArray()) + "\n]";
             }
             return "";
         }
@@ -103,7 +103,7 @@ namespace SharpChrome
                 foreach (HostCookies hostInstance in hostCookies)
                 {
                     // Determine if the hostname matches the subdomain perm
-                    if (hostInstance.HostName.ToLower().Contains(sub.ToLower()))
+                    if (hostInstance.HostName.ToLower() == sub.ToLower())
                     {
                         // If it does, cycle through
                         foreach (Cookie cookieInstance in hostInstance.Cookies)
