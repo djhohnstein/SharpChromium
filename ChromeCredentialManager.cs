@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
 using System.Security.Cryptography;
-using PInvoke;
 using CS_SQLite3;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -143,7 +142,7 @@ namespace SharpChrome
             int dwDataOutLen;
             //IntPtr pDataOut = IntPtr.Zero;
             IntPtr pData = IntPtr.Zero;
-            NTSTATUS ntStatus;
+            uint ntStatus;
             byte[] subArrayNoV10;
             int pcbResult = 0;
             unsafe
@@ -158,7 +157,7 @@ namespace SharpChrome
                     //IntPtr shiftedEncValPtr = IntPtr.Zero;
                     try
                     {
-                        
+
                         //shiftedEncValPtr = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(byte)) * shiftedEncVal.Length);
                         Marshal.Copy(dwData, 0, pData, dwData.Length);
                         Utils.MiscUtils.BCRYPT_INIT_AUTH_MODE_INFO(out info);
@@ -169,7 +168,7 @@ namespace SharpChrome
                         dwDataOutLen = dwData.Length - DPAPI_CHROME_UNKV10.Length - info.cbNonce - info.cbTag;
                         dwDataOut = new byte[dwDataOutLen];
 
-                        fixed(byte* pDataOut = dwDataOut)
+                        fixed (byte* pDataOut = dwDataOut)
                         {
                             ntStatus = BCrypt.BCryptDecrypt(hKey, info.pbNonce + info.cbNonce, dwDataOutLen, (void*)&info, null, 0, pDataOut, dwDataOutLen, out pcbResult, 0);
                         }
@@ -227,7 +226,7 @@ namespace SharpChrome
             DataTable resultantQuery = database.ExecuteQuery(query);
             database.CloseDatabase();
             HistoricUrl[] results = new HistoricUrl[resultantQuery.Rows.Count];
-            for(int i = 0; i < resultantQuery.Rows.Count; i++)
+            for (int i = 0; i < resultantQuery.Rows.Count; i++)
             {
                 DataRow row = resultantQuery.Rows[i];
                 results[i] = new HistoricUrl(row, cookies);
@@ -237,7 +236,8 @@ namespace SharpChrome
                 try
                 {
                     File.Delete(historyPath);
-                } catch { Console.WriteLine("[X] Failed to delete temp history file: {0}", historyPath); }
+                }
+                catch { Console.WriteLine("[X] Failed to delete temp history file: {0}", historyPath); }
             }
             return results;
         }
@@ -257,7 +257,7 @@ namespace SharpChrome
                 byte[] passwordBytes = Convert.FromBase64String((string)row["password_value"]);
                 byte[] decBytes = DecryptBlob(passwordBytes);
                 if (decBytes != null)
-                    password = Encoding.ASCII.GetString(decBytes);
+                    password = Encoding.UTF8.GetString(decBytes);
                 if (password != String.Empty)
                 {
                     logins.Add(new SavedLogin(row["action_url"].ToString(), row["username_value"].ToString(), password));
@@ -281,7 +281,7 @@ namespace SharpChrome
                 userChromeLoginDataPath,
                 userLocalStatePath
             };
-            foreach(string path in paths)
+            foreach (string path in paths)
             {
                 if (File.Exists(path))
                     return true;
@@ -343,25 +343,25 @@ namespace SharpChrome
             return base64Key;
         }
 
-        private static bool NT_SUCCESS(PInvoke.NTSTATUS status)
+        private static bool NT_SUCCESS(uint status)
         {
-            return PInvoke.NTSTATUS.Code.STATUS_SUCCESS == status;
+            return 0 == status;
         }
 
         //kuhl_m_dpapi_chrome_alg_key_from_raw
-        public static bool DPAPIChromeAlgKeyFromRaw(byte[] key, out PInvoke.BCrypt.SafeAlgorithmHandle hAlg, out PInvoke.BCrypt.SafeKeyHandle hKey)
+        public static bool DPAPIChromeAlgKeyFromRaw(byte[] key, out BCrypt.SafeAlgorithmHandle hAlg, out BCrypt.SafeKeyHandle hKey)
         {
             bool bRet = false;
             hAlg = null;
             hKey = null;
-            PInvoke.NTSTATUS ntStatus;
-            ntStatus = PInvoke.BCrypt.BCryptOpenAlgorithmProvider(out hAlg, PInvoke.BCrypt.AlgorithmIdentifiers.BCRYPT_AES_ALGORITHM, null, 0);
+            uint ntStatus;
+            ntStatus = BCrypt.BCryptOpenAlgorithmProvider(out hAlg, "AES", null, 0);
             if (NT_SUCCESS(ntStatus))
             {
-                ntStatus = PInvoke.BCrypt.BCryptSetProperty(hAlg, "ChainingMode", PInvoke.BCrypt.ChainingModes.Gcm, 0);
+                ntStatus = BCrypt.BCryptSetProperty(hAlg, "ChainingMode", "ChainingModeGCM", 0);
                 if (NT_SUCCESS(ntStatus))
                 {
-                    ntStatus = PInvoke.BCrypt.BCryptGenerateSymmetricKey(hAlg, out hKey, null, 0, key, key.Length, 0);
+                    ntStatus = BCrypt.BCryptGenerateSymmetricKey(hAlg, out hKey, null, 0, key, key.Length, 0);
                     if (NT_SUCCESS(ntStatus))
                         bRet = true;
                 }

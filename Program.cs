@@ -132,9 +132,24 @@ Arguments:
                         }
                     } else
                     {
+                        string totalResults = "";
                         foreach (var cookie in cookies)
                         {
-                            cookie.Print();
+                            string jsonArray = cookie.ToJSON();
+                            string jsonItems = jsonArray.Trim(new char[] { '[', ']', '\n' });
+                            totalResults += jsonItems + ",\n";
+                            // cookie.Print();
+                        }
+                        totalResults = totalResults.Trim(new char[] { ',', '\n' });
+                        totalResults = "[" + totalResults + "]";
+                        string filePath = Path.Combine(Environment.GetEnvironmentVariable("TEMP"), "cookies.json");
+                        try
+                        {
+                            File.WriteAllText(filePath, totalResults);
+                            Console.WriteLine("\n[*] All cookies written to {0}", filePath);
+                        } catch (Exception ex)
+                        {
+                            Console.WriteLine("[X] Exception occurred while writing cookies to file: {0}\n{1}", ex.Message, ex.StackTrace);
                         }
                     }
                 }

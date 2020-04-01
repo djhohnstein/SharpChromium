@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using PInvoke;
 using System.Security.Cryptography;
 using System.IO;
 
@@ -65,25 +64,25 @@ namespace SharpChrome
             return base64Key;
         }
 
-        private static bool NT_SUCCESS(PInvoke.NTSTATUS status)
+        private static bool NT_SUCCESS(uint status)
         {
-            return PInvoke.NTSTATUS.Code.STATUS_SUCCESS == status;
+            return 0 == status;
         }
 
         //kuhl_m_dpapi_chrome_alg_key_from_raw
-        public static bool DPAPIChromeAlgKeyFromRaw(byte[] key, out PInvoke.BCrypt.SafeAlgorithmHandle hAlg, out PInvoke.BCrypt.SafeKeyHandle hKey)
+        public static bool DPAPIChromeAlgKeyFromRaw(byte[] key, out BCrypt.SafeAlgorithmHandle hAlg, out BCrypt.SafeKeyHandle hKey)
         {
             bool bRet = false;
             hAlg = null;
             hKey = null;
-            PInvoke.NTSTATUS ntStatus;
-            ntStatus = PInvoke.BCrypt.BCryptOpenAlgorithmProvider(out hAlg, PInvoke.BCrypt.AlgorithmIdentifiers.BCRYPT_AES_ALGORITHM, null, 0);
+            uint ntStatus;
+            ntStatus = BCrypt.BCryptOpenAlgorithmProvider(out hAlg, "AES", null, 0);
             if (NT_SUCCESS(ntStatus))
             {
-                ntStatus = PInvoke.BCrypt.BCryptSetProperty(hAlg, "ChainingMode", PInvoke.BCrypt.ChainingModes.Gcm, 0);
+                ntStatus = BCrypt.BCryptSetProperty(hAlg, "ChainingMode", "ChainingModeGCM", 0);
                 if (NT_SUCCESS(ntStatus))
                 {
-                    ntStatus = PInvoke.BCrypt.BCryptGenerateSymmetricKey(hAlg, out hKey, null, 0, key, key.Length, 0);
+                    ntStatus = BCrypt.BCryptGenerateSymmetricKey(hAlg, out hKey, null, 0, key, key.Length, 0);
                     if (NT_SUCCESS(ntStatus))
                         bRet = true;
                 }
