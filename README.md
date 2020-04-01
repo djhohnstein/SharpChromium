@@ -68,4 +68,6 @@ The SQLite database parser is slightly bugged. This is due to the fact that the 
 
 A large thanks to @plainprogrammer for their C#-SQLite project which allowed for native parsing of the SQLite files without having to reflectively load a DLL. Without their work this project would be nowhere near as clean as it is. That project can be found here: https://github.com/plainprogrammer/csharp-sqlite
 
-Additionally, thanks to @gentlekiwi whose work on Mimikatz guided the rewrite for the decryption schema in v80+
+Thanks to @gentlekiwi whose work on Mimikatz guided the rewrite for the decryption schema in v80+
+
+Thanks to @harmj0y who carved out the requisite PInvoke BCrypt code so I could remove additional dependencies from this project, making it light-weight again.
