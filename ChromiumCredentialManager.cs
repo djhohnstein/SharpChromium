@@ -124,7 +124,7 @@ namespace SharpChromium
                 byte[] cookieValue = Convert.FromBase64String(row["encrypted_value"].ToString());
                 cookieValue = DecryptBlob(cookieValue);
                 if (cookieValue != null)
-                    cookie.Value = System.Text.Encoding.ASCII.GetString(cookieValue);
+                    cookie.Value = System.Text.Encoding.UTF8.GetString(cookieValue);
                 else
                     cookie.Value = "";
                 if (cookie != null)
