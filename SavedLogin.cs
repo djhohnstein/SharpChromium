@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpChrome
+namespace SharpChromium
 {
     class SavedLogin
     {
@@ -22,7 +22,7 @@ namespace SharpChrome
         public void Print()
         {
             string user = Environment.GetEnvironmentVariable("USERNAME");
-            Console.WriteLine("--- Chrome Credential (User: {0}) ---", user);
+            Console.WriteLine("--- Chromium Credential (User: {0}) ---", user);
             Console.WriteLine("URL      : {0}", Url);
             Console.WriteLine("Username : {0}", Username);
             Console.WriteLine("Password : {0}", Password);

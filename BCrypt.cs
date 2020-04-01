@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace SharpChrome
+namespace SharpChromium
 {
     public class BCrypt
     {

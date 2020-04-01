@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data;
 
-namespace SharpChrome
+namespace SharpChromium
 {
     public class HistoricUrl
     {
@@ -33,7 +33,7 @@ namespace SharpChrome
         public void Print()
         {
             string user = Environment.GetEnvironmentVariable("USERNAME");
-            Console.WriteLine("--- Chrome History (User: {0}) ---", user);
+            Console.WriteLine("--- Chromium History (User: {0}) ---", user);
             int spaces = 15;
             Console.WriteLine("{0}{1}: {2}", "URL", SpaceGenerator(spaces - 3), Url);
             Console.WriteLine("{0}{1}: {2}", "Title", SpaceGenerator(spaces - 5), Title == "" ? "No Title" : Title);

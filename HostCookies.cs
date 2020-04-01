@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpChrome
+namespace SharpChromium
 {
     public class HostCookies
     {
@@ -26,7 +26,7 @@ namespace SharpChrome
         public void Print()
         {
             string user = Environment.GetEnvironmentVariable("USERNAME");
-            Console.WriteLine("--- Chrome Cookie (User: {0}) ---", user);
+            Console.WriteLine("--- Chromium Cookie (User: {0}) ---", user);
             Console.WriteLine("Domain         : {0}", HostName);
             Console.WriteLine("Cookies (JSON) :\n{0}", ToJSON());
             Console.WriteLine();

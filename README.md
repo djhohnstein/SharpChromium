@@ -1,57 +1,60 @@
-# SharpChrome
+# SharpChromium
 
 ## Introduction
 
-SharpChrome is a .NET 4.0+ CLR project to retrieve data from Google Chrome. Currently, it can extract:
+SharpChromium is a .NET 4.0+ CLR project to retrieve data from Google Chrome, Microsoft Edge, and Microsoft Edge Beta. Currently, it can extract:
 
 - Cookies (in JSON format)
 - History (with associated cookies for each history item)
 - Saved Logins
 
-Note: All cookies returned are in JSON format. If you have the extension "Cookie Editor" installed, you can simply copy and paste into the "Import" seciton of this browser addon to ride the extraction session.
+Note: All cookies returned are in JSON format. If you have the extension [Cookie Editor](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm) installed, you can simply copy and paste into the "Import" seciton of this browser addon to ride the extracted session.
 
 ## Advantages
 
 This rewrite has several advantages to previous implementations, which include:
 
 - No Type compilation or reflection required
-- Cookies are displayed in JSON format, for easy importing into ~EditThisCookie~ Cookie Manager.
+- Cookies are displayed in JSON format, for easy importing into [Cookie Editor](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm).
 - No downloading SQLite assemblies from remote resources.
+- Supports major Chromium browsers (but extendable to others)
 
 ## Usage
 
 ```
 Usage:
-    .\SharpChrome.exe arg0 [arg1 arg2 ...]
+    .\SharpChromium.exe arg0 [arg1 arg2 ...]
 
 Arguments:
-    all       - Retrieve all Chrome Bookmarks, History, Cookies and Logins.
+    all       - Retrieve all Chromium Cookies, History and Logins.
     full      - The same as 'all'
     logins    - Retrieve all saved credentials that have non-empty passwords.
     history   - Retrieve user's history with a count of each time the URL was
                 visited, along with cookies matching those items.
-    cookies [domain1.com domain2.com] - Retrieve the user'scookies in JSON format.
+    cookies [domain1.com domain2.com] - Retrieve the user's cookies in JSON format.
                                         If domains are passed, then return only
-                                        cookies matching those domains.
+                                        cookies matching those domains. Otherwise,
+                                        all cookies are saved into a temp file of
+                                        the format ""%TEMP%\$browser-cookies.json""
 ```
 
 ## Examples
 
 Retrieve cookies associated with Google Docs and Github
 ```
-.\SharpChrome.exe cookies docs.google.com github.com
+.\SharpChromium.exe cookies docs.google.com github.com
 ```
 ![cookies](images/cookies.png)
 
 Retrieve history items and their associated cookies.
 ```
-.\SharpChrome.exe history
+.\SharpChromium.exe history
 ```
 ![history](images/history_item.png)
 
 Retrieve saved logins (Note: Only displays those with non-empty passwords):
 ```
-.\SharpChrome.exe logins
+.\SharpChromium.exe logins
 ```
 ![logins](images/logins.png)
 

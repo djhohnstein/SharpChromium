@@ -5,9 +5,9 @@ using System.Text;
 using System.Security.Cryptography;
 using System.IO;
 
-namespace SharpChrome
+namespace SharpChromium
 {
-    class ChromeUtils
+    class ChromiumUtils
     {
         static byte[] DPAPI_HEADER = UTF8Encoding.UTF8.GetBytes("DPAPI");
         public static byte[] DecryptBase64StateKey(string base64Key)
