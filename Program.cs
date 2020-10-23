@@ -51,12 +51,13 @@ Arguments:
             string homePath = System.Environment.GetEnvironmentVariable("HOMEPATH");
             string localAppData = System.Environment.GetEnvironmentVariable("LOCALAPPDATA");
 
-            string[] paths = new string[3];
-            //paths[0] = homeDrive + homePath + "\\Local Settings\\Application Data\\Google\\Chrome\\User Data\\";
+            string[] paths = new string[4];
+            
             paths[0] = localAppData + "\\Google\\Chrome\\User Data\\";
             paths[1] = localAppData + "\\Microsoft\\Edge\\User Data\\";
             paths[2] = localAppData + "\\Microsoft\\Edge Beta\\User Data\\";
-            //string chromeLoginDataPath = "C:\\Users\\Dwight\\Desktop\\Login Data";
+            // AppData\\Local\BraveSoftware\Brave-Browser\User Data\
+            paths[3] = localAppData + "\\BraveSoftware\\Brave-Browser\\User Data\\";
 
             string[] validArgs = { "all", "full", "logins", "history", "cookies" };
 
